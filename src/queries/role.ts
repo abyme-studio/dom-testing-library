@@ -118,8 +118,12 @@ const queryAllByRole: AllByRole = (
   }
 
   if (level !== undefined) {
-    // guard against using `level` option with any role other than `heading`
-    if (role !== 'heading') {
+    // guard against roles that do not support `aria-level` (heading, treeitem, row, ...)
+    if (
+      role !== 'heading' &&
+      allRoles.get(role as ARIARoleDefinitionKey)?.props['aria-level'] ===
+        undefined
+    ) {
       throw new Error(`Role "${role}" cannot have "level" property.`)
     }
   }
@@ -212,55 +216,48 @@ const queryAllByRole: AllByRole = (
       })
     })
     .filter(element => {
-      if (selected !== undefined) {
-        return selected === computeAriaSelected(element)
+      // Every state given must match, not only the first one checked.
+      if (selected !== undefined && selected !== computeAriaSelected(element)) {
+        return false
       }
-      if (busy !== undefined) {
-        return busy === computeAriaBusy(element)
+      if (busy !== undefined && busy !== computeAriaBusy(element)) {
+        return false
       }
-      if (checked !== undefined) {
-        return checked === computeAriaChecked(element)
+      if (checked !== undefined && checked !== computeAriaChecked(element)) {
+        return false
       }
-      if (pressed !== undefined) {
-        return pressed === computeAriaPressed(element)
+      if (pressed !== undefined && pressed !== computeAriaPressed(element)) {
+        return false
       }
-      if (current !== undefined) {
-        return current === computeAriaCurrent(element)
+      if (current !== undefined && current !== computeAriaCurrent(element)) {
+        return false
       }
-      if (expanded !== undefined) {
-        return expanded === computeAriaExpanded(element)
+      if (expanded !== undefined && expanded !== computeAriaExpanded(element)) {
+        return false
       }
-      if (level !== undefined) {
-        return level === computeHeadingLevel(element)
+      if (level !== undefined && level !== computeHeadingLevel(element)) {
+        return false
+      }
+      if (valueNow !== undefined && valueNow !== computeAriaValueNow(element)) {
+        return false
+      }
+      if (valueMax !== undefined && valueMax !== computeAriaValueMax(element)) {
+        return false
+      }
+      if (valueMin !== undefined && valueMin !== computeAriaValueMin(element)) {
+        return false
       }
       if (
-        valueNow !== undefined ||
-        valueMax !== undefined ||
-        valueMin !== undefined ||
-        valueText !== undefined
+        valueText !== undefined &&
+        !matches(
+          computeAriaValueText(element) ?? null,
+          element,
+          valueText,
+          text => text,
+        )
       ) {
-        let valueMatches = true
-        if (valueNow !== undefined) {
-          valueMatches &&= valueNow === computeAriaValueNow(element)
-        }
-        if (valueMax !== undefined) {
-          valueMatches &&= valueMax === computeAriaValueMax(element)
-        }
-        if (valueMin !== undefined) {
-          valueMatches &&= valueMin === computeAriaValueMin(element)
-        }
-        if (valueText !== undefined) {
-          valueMatches &&= matches(
-            computeAriaValueText(element) ?? null,
-            element,
-            valueText,
-            text => text,
-          )
-        }
-
-        return valueMatches
+        return false
       }
-      // don't care if aria attributes are unspecified
       return true
     })
     .filter(element => {

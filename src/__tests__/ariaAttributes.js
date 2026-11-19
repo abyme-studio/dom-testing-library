@@ -250,6 +250,36 @@ test('`level` matches elements with `heading` role', () => {
   expect(queryByRole('heading', {level: 4})).not.toBeInTheDocument()
 })
 
+test('`level` matches elements with `treeitem` role', () => {
+  const {getAllByRole} = renderIntoDocument(
+    `<ul role="tree">
+      <li role="treeitem" aria-level="1" aria-expanded="true" id="src">src
+        <ul role="group">
+          <li role="treeitem" aria-level="2" id="core">core</li>
+          <li role="treeitem" aria-level="2" id="test">test</li>
+        </ul>
+      </li>
+    </ul>`,
+  )
+  expect(getAllByRole('treeitem', {level: 2}).map(({id}) => id)).toEqual([
+    'core',
+    'test',
+  ])
+})
+
+test('every state option given must match', () => {
+  const {getAllByRole, queryByRole} = renderIntoDocument(
+    `<div role="tree">
+      <div role="treeitem" aria-level="1" aria-expanded="true" id="a">a</div>
+      <div role="treeitem" aria-level="2" aria-expanded="true" id="b">b</div>
+    </div>`,
+  )
+  expect(
+    getAllByRole('treeitem', {expanded: true, level: 1}).map(({id}) => id),
+  ).toEqual(['a'])
+  expect(queryByRole('treeitem', {expanded: false, level: 1})).toBeNull()
+})
+
 test('`level` throws on unsupported roles', () => {
   const {getByRole} = render(`<button>Button</button>`)
   expect(() =>
