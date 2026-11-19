@@ -1,3 +1,16 @@
+# abyme-studio's fork of DOM Testing Library
+
+Branch `abyme`: release v10.4.2, its `dist` built and committed, so a package manager can pin it by
+commit. Each fix and where upstream tracks it, so the fork can go once upstream takes them:
+
+- `level` on any role that supports `aria-level` (`treeitem`, `row`, ...), not only `heading`.
+  Upstream: https://github.com/testing-library/dom-testing-library/issues/980, draft PR
+  https://github.com/testing-library/dom-testing-library/pull/1088.
+- Every state option given to `*ByRole` must match (`{ expanded: true, level: 1 }` checked only
+  `expanded`). Upstream: no issue yet.
+
+Used by abyme's tessera spike (`spikes/tessera-bench`, the tests by role).
+
 <div align="center">
 <h1>DOM Testing Library</h1>
 
